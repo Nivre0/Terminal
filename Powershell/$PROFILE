@@ -1,0 +1,93 @@
+Write-Host "You can use Theme <name> to switch themes, Themes are:" -ForegroundColor Cyan
+Write-Host "['default', 'cloud', 'reset']" -ForegroundColor Cyan
+Write-Host "You can edit this configuration by typing: 'notepad `$PROFILE'" -ForegroundColor Cyan
+
+Set-Alias work Go-Work
+Set-Alias Work Go-Work
+
+Set-Alias reload Restart-PS
+Set-Alias Reload Restart-PS
+
+function Theme {
+    param (
+        [string]$ShortName
+    )
+
+    function Print-Help {
+        Write-Host "Type "-ForegroundColor Cyan -NoNewline
+        Write-Host "Theme reset" -ForegroundColor Magenta -NoNewline
+        Write-Host " to reset the Theme"-ForegroundColor Cyan
+        Write-Host "You can edit this configuration by typing: " -ForegroundColor Cyan -NoNewline
+        Write-Host "notepad `$PROFILE`n" -ForegroundColor Magenta 
+    }
+
+    # Define a mapping of short names to full theme names
+    $themeMap = @{
+        "cloud1" = "cloud-native-azure"
+    }
+
+    # Check if the short name exists in the map
+
+    if ($ShortName.Contains("help")) {
+        $keys = $themeMap.Keys -join ", "
+        Write-Host "`nYou can use Theme <name> to switch themes, Themes are: " -ForegroundColor Cyan -NoNewline
+        Write-Host "$keys" -ForegroundColor Magenta
+        Print-Help
+
+    } else {
+        if ($themeMap.ContainsKey($ShortName)) {
+            $themeName = $themeMap[$ShortName]
+            $themePath = "~/.poshthemes/$themeName.omp.json"
+            if (Test-Path $themePath) {
+                oh-my-posh init pwsh --config $themePath | Invoke-Expression
+                Write-Host "Switched to theme: $themeName" -ForegroundColor Green
+            } else {
+                Write-Host "Theme '$themeName' not found!" -ForegroundColor Red
+            }
+        } else {
+            if ($ShortName -eq "") {
+                $keys = $themeMap.Keys -join ", "
+                Write-Host "`nYou can use Theme <name> to switch themes, Themes are: " -ForegroundColor Cyan -NoNewline
+                Write-Host "$keys" -ForegroundColor Magenta
+                Print-Help
+            } else {
+
+            Write-Host "Unknown theme shortcut '$ShortName'. Available shortcuts: $($themeMap.Keys -join ', ')" -ForegroundColor Yellow
+            }
+        }
+    }
+
+    
+}
+
+
+function Reset-PoshTheme {
+    Remove-Item Function:\Prompt
+    Write-Host "Switched to default PowerShell prompt." -ForegroundColor Green
+}
+
+function Go-Work {
+    Set-Location "C:\work"
+}
+
+function Restart-PS {
+    Start-Process "powershell.exe" -ArgumentList "-NoExit", "-Command cd $PWD" -WorkingDirectory $PWD
+    exit
+}
+
+function time {
+    $time = Get-Date -Format "HH:mm:ss"
+    $date = Get-Date -Format "dd/MM/yyyy"
+    $day = (Get-Date).DayOfWeek
+    Write-Host "$date" -ForegroundColor Cyan -NoNewline
+    Write-Host " - " -ForegroundColor white -NoNewline
+    Write-Host "$time" -ForegroundColor Cyan -NoNewline
+}
+
+
+
+
+
+
+
+
